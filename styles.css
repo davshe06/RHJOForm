@@ -98,60 +98,60 @@
    variants mirror the base palette's structure. */
 
 :root[data-form="management"] {
-  --accent: #8c1d3f;
-  --accent-strong: #6f1732;
+  --accent: #ad0019;
+  --accent-strong: #8a0014;
   --accent-contrast: #ffffff;
-  --accent-soft: #fbe9ee;
-  --accent-ring: rgba(140, 29, 63, .15);
-  --accent-ring-soft: rgba(140, 29, 63, .12);
-  --tip-bg: #fdf0f3;
-  --tip-line: #edc0cd;
+  --accent-soft: #fbe9eb;
+  --accent-ring: rgba(173, 0, 25, .15);
+  --accent-ring-soft: rgba(173, 0, 25, .12);
+  --tip-bg: #fdf0f1;
+  --tip-line: #f0bcc3;
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-form="management"] {
-    --accent: #e08099;
-    --accent-strong: #eca0b4;
-    --accent-contrast: #1a0d12;
-    --accent-soft: #3d1b28;
-    --accent-ring: rgba(224, 128, 153, .25);
-    --accent-ring-soft: rgba(224, 128, 153, .18);
-    --tip-bg: #2e141d;
-    --tip-line: #6b2f43;
+    --accent: #f2647a;
+    --accent-strong: #f78a9c;
+    --accent-contrast: #1a0509;
+    --accent-soft: #3d141b;
+    --accent-ring: rgba(242, 100, 122, .25);
+    --accent-ring-soft: rgba(242, 100, 122, .18);
+    --tip-bg: #2e0e14;
+    --tip-line: #6b2530;
   }
 }
 
 :root[data-theme="dark"][data-form="management"] {
-  --accent: #e08099;
-  --accent-strong: #eca0b4;
-  --accent-contrast: #1a0d12;
-  --accent-soft: #3d1b28;
-  --accent-ring: rgba(224, 128, 153, .25);
-  --accent-ring-soft: rgba(224, 128, 153, .18);
-  --tip-bg: #2e141d;
-  --tip-line: #6b2f43;
+  --accent: #f2647a;
+  --accent-strong: #f78a9c;
+  --accent-contrast: #1a0509;
+  --accent-soft: #3d141b;
+  --accent-ring: rgba(242, 100, 122, .25);
+  --accent-ring-soft: rgba(242, 100, 122, .18);
+  --tip-bg: #2e0e14;
+  --tip-line: #6b2530;
 }
 
 :root[data-theme="light"][data-form="management"] {
-  --accent: #8c1d3f;
-  --accent-strong: #6f1732;
+  --accent: #ad0019;
+  --accent-strong: #8a0014;
   --accent-contrast: #ffffff;
-  --accent-soft: #fbe9ee;
-  --accent-ring: rgba(140, 29, 63, .15);
-  --accent-ring-soft: rgba(140, 29, 63, .12);
-  --tip-bg: #fdf0f3;
-  --tip-line: #edc0cd;
+  --accent-soft: #fbe9eb;
+  --accent-ring: rgba(173, 0, 25, .15);
+  --accent-ring-soft: rgba(173, 0, 25, .12);
+  --tip-bg: #fdf0f1;
+  --tip-line: #f0bcc3;
 }
 /* Management Resources also warms the sidebar (base sidebar is fixed navy) */
-:root[data-form="management"] .sidebar { background: #2b1220; }
-:root[data-form="management"] .nav-step:hover { background: #431e30; }
-:root[data-form="management"] .nav-step .nav-num { background: #57263c; }
+:root[data-form="management"] .sidebar { background: #2b0f13; }
+:root[data-form="management"] .nav-step:hover { background: #45181f; }
+:root[data-form="management"] .nav-step .nav-num { background: #5a1f27; }
 :root[data-form="management"] .theme-btn,
-:root[data-form="management"] .nav-reset { border-color: #5e2c44; }
-:root[data-form="management"] .theme-btn.active { background: #57263c; border-color: #c98da2; }
+:root[data-form="management"] .nav-reset { border-color: #61242c; }
+:root[data-form="management"] .theme-btn.active { background: #5a1f27; border-color: #d18e97; }
 :root[data-form="management"] .theme-btn:hover,
-:root[data-form="management"] .nav-reset:hover { border-color: #c98da2; }
-:root[data-form="management"] .brand span { color: #cf9db0; }
+:root[data-form="management"] .nav-reset:hover { border-color: #d18e97; }
+:root[data-form="management"] .brand span { color: #d99aa2; }
 
 
 
