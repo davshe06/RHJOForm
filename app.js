@@ -1556,6 +1556,9 @@ function truthy(v) { return Array.isArray(v) ? v.length > 0 : !!(v && String(v).
 function render() {
   const app = document.getElementById("app");
   app.innerHTML = "";
+  /* stamp the active form so its accent theme applies (see per-business
+     accent theme in styles.css) */
+  document.documentElement.dataset.form = store.formId;
   const steps = wizardSteps();
   /* saved step indexes can exceed the step count after a layout change */
   if (currentStep >= steps.length) currentStep = steps.length - 1;

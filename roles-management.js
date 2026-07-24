@@ -14,6 +14,34 @@
    app.js is a generic engine and needs no changes.
    ========================================================================= */
 
+/* -------------------------------------------------------------------------
+   Management Resources capability matrix — the four strategic pillars and the
+   capabilities under each. Captured on the intake so the engagement maps to
+   how the practice positions itself with CFO / CAO / CAE / CTO / CHRO / CPO /
+   COO buyers.
+   ------------------------------------------------------------------------- */
+
+const PILLAR_BAU = "Accounting, Finance, Tax, Treasury & Audit";
+const PILLAR_TRANSFORM = "Finance Transformation";
+const PILLAR_DATA = "Data, Systems & ERP";
+const PILLAR_PERF = "Performance Optimization & Business Analytics";
+
+const CAPABILITY_PILLARS = [PILLAR_BAU, PILLAR_TRANSFORM, PILLAR_DATA, PILLAR_PERF];
+
+const CAP_BAU = ["Fractional CFO / Controllership", "Consolidations & Month-End Close", "Technical Accounting",
+                 "Audit & Tax", "SOX", "IFRS", "Compliance", "Remediation & Controls",
+                 "IPO Readiness", "Financial Restatements", "Treasury & Cash Management"];
+const CAP_TRANSFORM = ["Order to Cash (O2C)", "Procure to Pay (P2P)", "Record to Report (R2R)",
+                       "Shared Services Optimization", "Accounting Close Acceleration",
+                       "M&A Integration & Carve-Outs", "Process Improvement"];
+const CAP_DATA = ["Data Readiness for AI", "Data Integration & Migration",
+                  "EPM Tools: Reporting, Forecasting & BI", "Project Management", "Change Management"];
+const CAP_PERF = ["FP&A & Data Analytics", "Pricing, Predictive Modeling & Scenario Analysis",
+                  "Supply Chain & Procurement"];
+
+const EXEC_SPONSORS = ["CFO", "CAO", "CAE", "CTO", "CHRO", "CPO", "COO",
+                       "VP Finance", "Controller", "Audit Committee", "Other"];
+
 const COMMON = {
   basics: {
     title: "Basic Information",
@@ -23,9 +51,22 @@ const COMMON = {
       { id: "client_company", type: "text", label: "Client company", placeholder: "Acme Corp" },
       { id: "company_website", type: "text", label: "Company website", placeholder: "https://www.client.com" },
       { id: "client_contact", type: "text", label: "Client contact(s) on the call", placeholder: "Name, title" },
+      { id: "exec_sponsor", type: "chips", label: "Which executive does this engagement serve?", options: EXEC_SPONSORS },
       { id: "job_title", type: "text", label: "Exact title on the req", placeholder: "e.g., Interim Controller" },
       { id: "why_hiring", type: "textarea", label: "Why are you hiring? What business problem are you trying to solve?",
         placeholder: "The driver — a close that's slipping, an audit, a system implementation, a leave of absence, growth…" },
+      /* MR capability matrix: pillar first, then the specific capabilities under
+         each selected pillar (each list only appears once its pillar is chosen) */
+      { id: "capability_pillar", type: "chips", label: "Which Management Resources capability areas does this engagement cover?",
+        options: CAPABILITY_PILLARS },
+      { id: "cap_bau", type: "chips", label: "Accounting, Finance, Tax, Treasury & Audit — which capabilities?",
+        options: CAP_BAU, showIf: a => (a.capability_pillar || []).includes(PILLAR_BAU) },
+      { id: "cap_transform", type: "chips", label: "Finance Transformation — which capabilities?",
+        options: CAP_TRANSFORM, showIf: a => (a.capability_pillar || []).includes(PILLAR_TRANSFORM) },
+      { id: "cap_data", type: "chips", label: "Data, Systems & ERP — which capabilities?",
+        options: CAP_DATA, showIf: a => (a.capability_pillar || []).includes(PILLAR_DATA) },
+      { id: "cap_perf", type: "chips", label: "Performance Optimization & Business Analytics — which capabilities?",
+        options: CAP_PERF, showIf: a => (a.capability_pillar || []).includes(PILLAR_PERF) },
       { id: "replacement_or_new", type: "radio", label: "Replacement or new position?",
         options: ["Replacement", "New position", "Project / interim coverage"] },
       { id: "replacement_why", type: "textarea", label: "What happened with the previous person?",
@@ -51,6 +92,16 @@ const COMMON = {
         text: "Competing firms in play — ask about exclusivity, how many profiles they've seen, and why nobody has been engaged yet." },
       { when: a => a.strategic_vs_hands_on === "Mostly hands-on / in the details",
         text: "Hands-on roles need candidates who are still in the weeds — confirm they'll be doing the work, not directing it, so you don't send an over-titled profile." },
+      { when: a => (a.capability_pillar || []).length >= 3,
+        text: "Three or more capability pillars in one engagement is a scope flag — either this is a program needing multiple consultants, or the client hasn't defined the work. Push them to name the primary deliverable." },
+      { when: a => (a.cap_bau || []).includes("IPO Readiness") || (a.cap_bau || []).includes("Financial Restatements"),
+        text: "IPO readiness and restatements are high-stakes, deadline-driven work — target consultants with public-company and SEC reporting experience, and set premium rate expectations." },
+      { when: a => (a.cap_data || []).includes("Data Readiness for AI"),
+        text: "Data readiness for AI is a newer MR capability — position it as governance, data quality, and integration work, not model building, so the client scopes it correctly." },
+      { when: a => (a.cap_transform || []).includes("M&A Integration & Carve-Outs"),
+        text: "Carve-outs and integrations run on deal timelines that don't move — confirm the close date and staffing ramp before committing." },
+      { when: a => (a.exec_sponsor || []).includes("CAE") || (a.exec_sponsor || []).includes("Audit Committee"),
+        text: "A CAE or audit-committee sponsor means independence and credentials matter — expect certification requirements and a more formal reporting line." },
       { when: a => !((a.engagement_type || []).includes("Direct hire (Perm)")),
         text: "Reminder: introduce Perm as an option on every job order, as well as FTEP." }
     ]
@@ -596,6 +647,23 @@ const ROLES = {
         tips: [
           { when: a => (a.areas || []).includes("SaaS metrics (ARR, churn)"),
             text: "SaaS metrics fluency (ARR, NRR, CAC, churn) is a distinct skill set — target candidates from subscription businesses." }
+        ] } },
+      { id: "pricing_predictive", label: "Pricing & Predictive Modeling", icon: "🎯", deepDive: {
+        intro: "A named MR capability — pricing strategy and forward-looking scenario work.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["Price setting / strategy", "Margin / profitability analysis", "Discounting & rebates",
+                      "Price increase modeling", "Elasticity analysis", "Customer / product profitability"] },
+          { id: "predictive", type: "chips", label: "Predictive / scenario work?",
+            options: ["Scenario & sensitivity analysis", "Predictive forecasting", "Statistical modeling", "Monte Carlo / simulation", "None"] },
+          { id: "tools", type: "chips", label: "Tools used?",
+            options: ["Excel", "Power BI", "Tableau", "Python / R", "SQL", "Pricing software"] }
+        ],
+        tips: [
+          { when: a => (a.predictive || []).includes("Statistical modeling") || (a.predictive || []).includes("Monte Carlo / simulation"),
+            text: "Statistical modeling pushes this beyond traditional FP&A — confirm whether the client needs a finance analyst with modeling chops or a data scientist." },
+          { when: a => (a.scope || []).includes("Price increase modeling"),
+            text: "Pricing actions are board-visible and margin-critical — target analysts who've modeled and defended a real price change, not just reported on margin." }
         ] } },
       { id: "process_improvement", label: "Process & Automation", icon: "⚡", deepDive: {
         intro: "Many FP&A hires are brought in to fix the process.",
@@ -1216,20 +1284,667 @@ const ROLES = {
     metrics: ["Forecast accuracy", "Days cash on hand", "Bank fees reduced", "Covenant compliance",
               "Cash conversion cycle", "Idle cash / yield", "Wire accuracy", "DSO / DPO"],
     backgrounds: BG_COMMON.concat(["Banking", "PE-backed / leveraged", "Multinational treasury"])
+  },
+
+  /* ------------------------------------------- FINANCE TRANSFORMATION */
+  finance_transformation: {
+    label: "Finance Transformation Consultant",
+    icon: "🔄",
+    tagline: "O2C, P2P, R2R, shared services, and process redesign",
+    about: "Finance transformation consultants redesign how finance actually works — the end-to-end cycles like order-to-cash, procure-to-pay, and record-to-report. They map current processes, find the waste and the manual workarounds, and rebuild them, often alongside a system change or a shared-services move.",
+    blurb: "Transformation engagements are defined by which cycle is broken and how far the mandate goes — assess and recommend, or design and implement. Pin the cycle, the scope of change, and who owns adoption after the consultant leaves.",
+    timePrompt: "“Between assessment, design, implementation, and change management — what three things carry most of the engagement, and roughly what percentage each?”",
+    focusAreas: [
+      { id: "o2c", label: "Order to Cash (O2C)", icon: "💳", deepDive: {
+        intro: "The revenue cycle — from order entry through cash application.",
+        questions: [
+          { id: "scope", type: "chips", label: "Which sub-processes?",
+            options: ["Order management", "Billing / invoicing", "Credit management", "Collections", "Cash application", "Disputes / deductions", "Revenue recognition"] },
+          { id: "pain", type: "chips", label: "Known pain points?",
+            options: ["High DSO", "Manual invoicing", "Billing errors", "Slow cash application", "Poor collections process", "Disputes backlog"] },
+          { id: "mandate", type: "radio", label: "Mandate?",
+            options: ["Assess and recommend", "Design the future state", "Implement the change", "End to end"] }
+        ],
+        tips: [
+          { when: a => (a.pain || []).includes("High DSO"),
+            text: "DSO reduction is a measurable, board-visible win — get the current DSO and target so the consultant has a scoreboard." }
+        ] } },
+      { id: "p2p", label: "Procure to Pay (P2P)", icon: "🧾", deepDive: {
+        intro: "The spend cycle — requisition through payment.",
+        questions: [
+          { id: "scope", type: "chips", label: "Which sub-processes?",
+            options: ["Requisition / approval", "Purchase orders", "Vendor onboarding", "Invoice processing", "Three-way match", "Payments", "Expense management"] },
+          { id: "automation", type: "radio", label: "Automation maturity?",
+            options: ["Highly manual", "Partially automated", "Mostly automated"] },
+          { id: "tools", type: "chips", label: "P2P tools in play?",
+            options: ["Coupa", "Ariba", "Bill.com", "Concur", "Tipalti", "ERP-native", "None"] }
+        ], tips: [] } },
+      { id: "r2r", label: "Record to Report (R2R)", icon: "📗", deepDive: {
+        intro: "The close-and-report cycle end to end.",
+        questions: [
+          { id: "scope", type: "chips", label: "Which sub-processes?",
+            options: ["Journal entries", "Reconciliations", "Intercompany", "Consolidation", "Financial reporting", "Close calendar / governance"] },
+          { id: "state", type: "radio", label: "Current state?",
+            options: ["Documented and controlled", "Partially documented", "Tribal knowledge / undocumented"] }
+        ],
+        tips: [
+          { when: a => a.state === "Tribal knowledge / undocumented",
+            text: "Undocumented processes mean the first deliverable is documentation — set that expectation so the client doesn't expect immediate savings." }
+        ] } },
+      { id: "close_acceleration", label: "Accounting Close Acceleration", icon: "⏱️", deepDive: {
+        intro: "A named MR capability — compressing the close.",
+        questions: [
+          { id: "current", type: "select", label: "Current close duration?",
+            options: ["1–3 days", "4–5 days", "6–10 days", "10+ days", "Not sure"] },
+          { id: "target", type: "text", label: "Target close duration?", placeholder: "e.g., 5 days by year-end" },
+          { id: "levers", type: "chips", label: "Levers in scope?",
+            options: ["Task standardization", "Automation / tooling", "Pre-close activities", "Materiality thresholds",
+                      "Reconciliation redesign", "Org / role changes", "System configuration"] }
+        ],
+        tips: [
+          { when: a => ["10+ days"].includes(a.current),
+            text: "A 10+ day close usually has structural causes — staffing, systems, or data. Make sure the client isn't expecting a consultant to fix it by working harder." }
+        ] } },
+      { id: "shared_services", label: "Shared Services Optimization", icon: "🏢", deepDive: {
+        intro: "Centralizing or improving a shared-services organization.",
+        questions: [
+          { id: "stage", type: "radio", label: "Stage?",
+            options: ["Building a new SSC", "Optimizing an existing SSC", "Migrating work into an SSC", "Evaluating outsourcing"] },
+          { id: "scope", type: "chips", label: "Functions in scope?",
+            options: ["AP", "AR", "Payroll", "General accounting", "Travel & expense", "Master data"] },
+          { id: "geography", type: "text", label: "Locations involved?", placeholder: "e.g., US + Manila captive center" }
+        ],
+        tips: [
+          { when: a => a.stage === "Building a new SSC",
+            text: "Standing up a shared-services center is a multi-workstream program — confirm whether they need one consultant or a team, and who owns change management." }
+        ] } },
+      { id: "ma_integration", label: "M&A Integration & Carve-Outs", icon: "🤝", deepDive: {
+        intro: "Deal-driven finance work on a fixed timeline.",
+        questions: [
+          { id: "type", type: "radio", label: "Transaction type?",
+            options: ["Acquisition integration", "Carve-out / divestiture", "Merger of equals", "Multiple / roll-up"] },
+          { id: "scope", type: "chips", label: "Finance scope?",
+            options: ["Chart of accounts harmonization", "Systems integration", "Process alignment", "Opening balance sheet",
+                      "TSA management", "Standalone cost modeling", "Day-1 readiness"] },
+          { id: "timeline", type: "text", label: "Deal timeline?", placeholder: "e.g., close 9/30, Day 1 integration 10/1" }
+        ],
+        tips: [
+          { when: a => a.type === "Carve-out / divestiture",
+            text: "Carve-outs require standalone cost and TSA experience — a distinct skill from integration. Screen for the specific side of the deal." }
+        ] } },
+      { id: "process_improvement", label: "Process Improvement & Controls", icon: "⚡", deepDive: {
+        intro: "General process redesign and the controls that come with it.",
+        questions: [
+          { id: "methodology", type: "chips", label: "Methodology expected?",
+            options: ["Lean / Six Sigma", "Process mapping (BPMN)", "RPA / automation", "Benchmarking", "No formal method"] },
+          { id: "deliverables", type: "chips", label: "Deliverables?",
+            options: ["Current-state assessment", "Future-state design", "SOPs / documentation", "Roadmap / business case", "Implemented change"] },
+          { id: "savings", type: "text", label: "Savings or efficiency target?", placeholder: "e.g., 20% reduction in manual hours" }
+        ], tips: [] } }
+    ],
+    specialists: [
+      { label: "Controller / accounting team", overlapsArea: "r2r" },
+      { label: "AP / P2P team", overlapsArea: "p2p" },
+      { label: "AR / collections team", overlapsArea: "o2c" },
+      { label: "Shared services leadership", overlapsArea: "shared_services" },
+      { label: "PMO / project managers", overlapsArea: "process_improvement" },
+      { label: "IT / systems team", overlapsArea: null },
+      { label: "Internal Audit", overlapsArea: "process_improvement" }
+    ],
+    profileRules: [
+      { must: ["o2c", "p2p"], profile: "Transactional cycle specialist",
+        detail: "Target consultants who've redesigned O2C or P2P end to end. Cycle metrics (DSO, invoice cost) are the filters." },
+      { must: ["r2r", "close_acceleration"], profile: "Close acceleration consultant",
+        detail: "Target consultants with documented close-compression wins. Ask for the before/after days and how they got there." },
+      { must: ["ma_integration", "process_improvement"], profile: "M&A integration consultant",
+        detail: "Target Big 4 transaction-services or corporate development finance backgrounds. Day-1 readiness and TSAs are the filters." },
+      { must: ["shared_services", "process_improvement"], profile: "Shared services / operating model consultant",
+        detail: "Target consultants who've built or optimized an SSC. Migration and change management are the filters." }
+    ],
+    stackCategories: [
+      { id: "erp", label: "ERP", placeholder: "SAP, Oracle, NetSuite…", options: ERP_OPTIONS },
+      { id: "p2p_tools", label: "P2P / AP automation", placeholder: "Coupa, Ariba, Bill.com…",
+        options: ["Coupa", "Ariba", "Bill.com", "Concur", "Tipalti", "Esker", "AvidXchange"] },
+      { id: "o2c_tools", label: "O2C / billing tools", placeholder: "HighRadius, Zuora…",
+        options: ["HighRadius", "Zuora", "Salesforce CPQ", "BillingPlatform", "ERP-native"] },
+      { id: "close_tools", label: "Close / automation", placeholder: "BlackLine, FloQast…",
+        options: ["BlackLine", "FloQast", "Trintech", "Power Automate", "UiPath", "Alteryx"] },
+      { id: "process_tools", label: "Process / PM tools", placeholder: "Visio, Lucidchart, Jira…",
+        options: ["Visio", "Lucidchart", "Celonis", "Signavio", "Jira", "Smartsheet"] }
+    ],
+    aiUseCases: ["Process documentation", "Current-state analysis", "Invoice / document processing", "Anomaly detection",
+                 "SOP drafting", "Business case modeling", "Workflow automation"],
+    aiTools: ["ChatGPT / Claude", "Microsoft Copilot (M365)", "Power Automate", "UiPath", "Celonis process mining", "Alteryx AI"],
+    metrics: ["Close cycle time", "DSO / DPO", "Cost per invoice", "Manual hours eliminated", "Process cycle time",
+              "Cost savings delivered", "Automation rate", "Day-1 readiness", "Error / rework rate"],
+    backgrounds: BG_COMMON.concat(["Big 4 consulting", "Transaction services", "Shared services center", "ERP consulting firm"])
+  },
+
+  /* ----------------------------------------------- EPM / DATA & ANALYTICS */
+  epm_data: {
+    label: "EPM / Data & Analytics Consultant",
+    icon: "🧠",
+    tagline: "EPM tools, BI, data integration, and AI readiness",
+    about: "These consultants build the reporting and planning layer finance runs on — implementing EPM tools like Hyperion, OneStream, or Anaplan, building BI dashboards, and integrating or migrating financial data between systems. Increasingly they also prepare a company's data so it's clean and governed enough for AI to use.",
+    blurb: "This is the Data, Systems & ERP pillar — part finance, part data engineering. Pin the specific platform, whether it's implementation or reporting build-out, and how much data plumbing versus analysis the client actually needs.",
+    timePrompt: "“Between tool implementation, data work, report building, and enabling users — what three things carry most of the engagement, and roughly what percentage each?”",
+    focusAreas: [
+      { id: "epm_tools", label: "EPM Tools & Implementation", icon: "🛠️", deepDive: {
+        intro: "The platform is the single hardest filter on this pool.",
+        questions: [
+          { id: "platform", type: "chips", label: "Which EPM platform?",
+            options: ["Hyperion / HFM", "OneStream", "Anaplan", "Adaptive Insights", "Planful", "Vena", "SAP BPC", "Oracle EPM Cloud"] },
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["New implementation", "Upgrade / migration", "Model build", "Consolidation build", "Planning / budgeting build", "Admin & support"] },
+          { id: "role", type: "radio", label: "Their role?",
+            options: ["Lead consultant / architect", "Build and configure", "Support existing model", "Business SME"] }
+        ],
+        tips: [
+          { when: a => (a.platform || []).includes("OneStream") || (a.platform || []).includes("Anaplan"),
+            text: "OneStream and Anaplan certified builders are scarce and command premium rates — confirm certification requirements and reset budget early." }
+        ] } },
+      { id: "data_integration", label: "Data Integration & Migration", icon: "🔀", deepDive: {
+        intro: "Moving and connecting financial data between systems.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["ERP data migration", "System-to-system integration", "Data mapping", "Data cleansing", "Historical conversion", "Validation / reconciliation"] },
+          { id: "sources", type: "text", label: "Which systems are being connected?", placeholder: "e.g., NetSuite → Snowflake → Power BI" },
+          { id: "technical", type: "radio", label: "Technical depth needed?",
+            options: ["Builds pipelines (SQL/ETL)", "Configures integration tools", "Defines requirements only"] }
+        ],
+        tips: [
+          { when: a => (a.scope || []).includes("Historical conversion"),
+            text: "Historical data conversion is where migrations blow up — screen for candidates who've reconciled converted balances, not just moved files." }
+        ] } },
+      { id: "reporting_bi", label: "Reporting & BI", icon: "📊", deepDive: {
+        intro: "Building the reporting layer that finance and the business consume.",
+        questions: [
+          { id: "tools", type: "chips", label: "BI tools?", options: REPORTING_OPTIONS },
+          { id: "deliverables", type: "chips", label: "What do they build?",
+            options: ["Executive dashboards", "Financial statements", "Operational KPIs", "Self-service models", "Data models / semantic layer"] },
+          { id: "audience", type: "radio", label: "Primary audience?",
+            options: ["Executives / board", "Finance team", "Business operators", "All of the above"] }
+        ], tips: [] } },
+      { id: "ai_readiness", label: "Data Readiness for AI", icon: "🤖", deepDive: {
+        intro: "A named MR capability — getting data governed and clean enough for AI.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["Data quality assessment", "Data governance / ownership", "Master data management", "Taxonomy / metadata",
+                      "Data lineage & documentation", "Security & access controls", "AI use-case identification"] },
+          { id: "maturity", type: "radio", label: "Current data maturity?",
+            options: ["Ad hoc / spreadsheets", "Some governance", "Governed and documented", "Not sure"] },
+          { id: "ai_goal", type: "textarea", label: "What does the client want AI to do eventually?",
+            placeholder: "Forecasting, anomaly detection, close automation, self-service analytics…" }
+        ],
+        tips: [
+          { when: a => a.maturity === "Ad hoc / spreadsheets",
+            text: "If the data lives in spreadsheets, AI readiness is really a governance and infrastructure project — scope it as foundational work, not an AI build." },
+          { when: (a, s) => areaPriority(s, "ai_readiness") === "must",
+            text: "Data readiness for AI is a newer positioning for MR — make sure the client and the consultant agree on whether the deliverable is governance or working models." }
+        ] } },
+      { id: "master_data", label: "Master Data & Chart of Accounts", icon: "🗂️", deepDive: {
+        intro: "Structural data work that underpins everything else.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["Chart of accounts redesign", "Cost center / hierarchy structure", "Vendor / customer master",
+                      "Product master", "Data standards", "Governance process"] },
+          { id: "driver", type: "radio", label: "What's driving it?",
+            options: ["ERP implementation", "M&A harmonization", "Reporting problems", "Cleanup / hygiene"] }
+        ], tips: [] } },
+      { id: "analytics_build", label: "Advanced Analytics", icon: "📈", deepDive: {
+        intro: "Beyond dashboards — modeling and statistical analysis.",
+        questions: [
+          { id: "scope", type: "chips", label: "Analytics scope?",
+            options: ["Predictive modeling", "Scenario analysis", "Driver-based models", "Statistical analysis", "Machine learning"] },
+          { id: "tools", type: "chips", label: "Tools?",
+            options: ["Python", "R", "SQL", "Alteryx", "Excel", "Databricks", "Snowflake"] }
+        ],
+        tips: [
+          { when: a => (a.tools || []).includes("Python") || (a.tools || []).includes("R"),
+            text: "Python/R requirements move this toward a data-science profile — confirm whether the client needs a finance analyst or a data scientist." }
+        ] } },
+      { id: "enablement", label: "User Enablement & Documentation", icon: "🎓", deepDive: {
+        intro: "Making the build stick after the consultant leaves.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's expected?",
+            options: ["Training delivery", "Documentation / runbooks", "Train-the-trainer", "Ongoing support handoff", "Adoption tracking"] }
+        ], tips: [] } }
+    ],
+    specialists: [
+      { label: "FP&A team", overlapsArea: "reporting_bi" },
+      { label: "IT / data engineering", overlapsArea: "data_integration" },
+      { label: "BI / Data Analyst", overlapsArea: "reporting_bi" },
+      { label: "ERP / systems team", overlapsArea: "epm_tools" },
+      { label: "Data governance lead", overlapsArea: "ai_readiness" },
+      { label: "Implementation partner", overlapsArea: "epm_tools" }
+    ],
+    profileRules: [
+      { must: ["epm_tools", "enablement"], profile: "EPM implementation consultant",
+        detail: "Target certified consultants on the named platform. Full-cycle implementations and model builds are the filters." },
+      { must: ["data_integration", "master_data"], profile: "Finance data / integration consultant",
+        detail: "Target consultants who've run data conversions. Mapping, cleansing, and reconciliation of converted data are the filters." },
+      { must: ["reporting_bi", "analytics_build"], profile: "Finance analytics consultant",
+        detail: "Target analysts who build the reporting layer. BI tool depth plus finance fluency are the filters." },
+      { must: ["ai_readiness", "master_data"], profile: "Data governance / AI readiness consultant",
+        detail: "Target consultants with governance and MDM experience. Data quality frameworks and stewardship models are the filters." }
+    ],
+    stackCategories: [
+      { id: "epm", label: "EPM platforms", placeholder: "OneStream, Anaplan…",
+        options: ["Hyperion / HFM", "OneStream", "Anaplan", "Adaptive Insights", "Planful", "Vena", "SAP BPC", "Oracle EPM Cloud"] },
+      { id: "bi", label: "BI / visualization", placeholder: "Power BI, Tableau…", options: REPORTING_OPTIONS },
+      { id: "data_platform", label: "Data platform", placeholder: "Snowflake, Databricks…",
+        options: ["Snowflake", "Databricks", "Azure Synapse", "BigQuery", "Redshift", "SQL Server"] },
+      { id: "integration_tools", label: "Integration / ETL", placeholder: "Boomi, Alteryx, SQL…",
+        options: ["Boomi", "MuleSoft", "Alteryx", "Informatica", "Fivetran", "SQL", "Power Query"] },
+      { id: "erp", label: "ERP source systems", placeholder: "SAP, NetSuite…", options: ERP_OPTIONS }
+    ],
+    aiUseCases: ["Data quality assessment", "Report building", "Model documentation", "Data mapping",
+                 "Forecast automation", "Anomaly detection", "Self-service enablement"],
+    aiTools: ["ChatGPT / Claude", "Microsoft Copilot (M365)", "Power BI Copilot", "Databricks AI", "Alteryx AI",
+              "OneStream / Anaplan AI", "Snowflake Cortex"],
+    metrics: ["Implementation milestones", "Report adoption", "Data quality scores", "Forecast accuracy",
+              "Manual reporting hours eliminated", "System uptime", "User satisfaction", "Time to insight"],
+    backgrounds: BG_COMMON.concat(["EPM consulting firm", "Big 4 consulting", "Systems integrator", "Data / analytics consultancy"])
+  },
+
+  /* --------------------------------------- PROJECT & CHANGE MANAGEMENT */
+  project_change: {
+    label: "Project / Change Management Consultant",
+    icon: "🗓️",
+    tagline: "Finance PMO, program delivery, and change adoption",
+    about: "These consultants run the finance side of major projects — system implementations, transformations, integrations — keeping workstreams, timelines, and stakeholders coordinated. The change-management half focuses on the people side: making sure the new process is actually adopted rather than worked around.",
+    blurb: "Finance PMO roles range from a scheduler tracking a plan to a program lead who owns delivery across workstreams. Pin the authority level, the program type, and whether change management is genuinely in scope or an afterthought.",
+    timePrompt: "“Between planning, stakeholder management, execution oversight, and change/adoption work — what three things carry most of the week, and roughly what percentage each?”",
+    focusAreas: [
+      { id: "program_delivery", label: "Program & Project Delivery", icon: "📋", deepDive: {
+        intro: "What they're actually delivering and how much they own.",
+        questions: [
+          { id: "program_type", type: "chips", label: "Program type?",
+            options: ["ERP implementation", "EPM / reporting implementation", "Finance transformation", "M&A integration",
+                      "Shared services build", "Close acceleration", "Compliance / remediation"] },
+          { id: "authority", type: "radio", label: "Authority level?",
+            options: ["Owns delivery — program lead", "Manages a workstream", "Coordinates / tracks", "PMO support"] },
+          { id: "scale", type: "text", label: "Program scale?", placeholder: "e.g., 6 workstreams, 40 people, $3M budget" }
+        ],
+        tips: [
+          { when: a => a.authority === "Owns delivery — program lead",
+            text: "Program-lead authority requires someone who's carried a program end to end — ask what went wrong on their last one and how they handled it." }
+        ] } },
+      { id: "change_management", label: "Change Management & Adoption", icon: "🔁", deepDive: {
+        intro: "The people side — a named MR capability.",
+        questions: [
+          { id: "scope", type: "chips", label: "Change scope?",
+            options: ["Stakeholder analysis", "Communications plan", "Training strategy", "Adoption measurement",
+                      "Resistance management", "Org design / role changes"] },
+          { id: "methodology", type: "chips", label: "Methodology?",
+            options: ["Prosci / ADKAR", "Kotter", "In-house framework", "No formal method"] },
+          { id: "impact", type: "text", label: "How many people are affected?", placeholder: "e.g., 200 finance and ops users across 3 sites" }
+        ],
+        tips: [
+          { when: a => (a.methodology || []).includes("Prosci / ADKAR"),
+            text: "Prosci certification is a real credential in change management — treat it as a filter if the client named it." },
+          { when: (a, s) => areaPriority(s, "change_management") === "must",
+            text: "If change management is a must-have, confirm the client will actually fund communications and training — otherwise the consultant gets blamed for poor adoption." }
+        ] } },
+      { id: "stakeholders", label: "Stakeholder & Executive Management", icon: "🤝", deepDive: {
+        intro: "Who they manage up to and across.",
+        questions: [
+          { id: "audience", type: "chips", label: "Stakeholders?",
+            options: ["C-suite / steering committee", "Finance leadership", "IT leadership", "Business unit leaders",
+                      "External vendors / SI", "Board"] },
+          { id: "reporting", type: "chips", label: "Reporting cadence?",
+            options: ["Weekly status", "Steering committee decks", "Executive dashboards", "Ad hoc escalation"] }
+        ], tips: [] } },
+      { id: "planning_governance", label: "Planning & Governance", icon: "🧭", deepDive: {
+        intro: "The mechanics of running the program.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["Project plan / schedule", "RAID log (risks, issues)", "Budget tracking", "Resource planning",
+                      "Vendor / SOW management", "Governance framework", "Status reporting"] },
+          { id: "methodology", type: "radio", label: "Delivery methodology?",
+            options: ["Waterfall", "Agile", "Hybrid", "Whatever works"] }
+        ], tips: [] } },
+      { id: "testing_cutover", label: "Testing & Cutover", icon: "🚦", deepDive: {
+        intro: "Getting from build to live without breaking the close.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["UAT coordination", "Test script development", "Defect triage", "Cutover planning",
+                      "Parallel run", "Hypercare / post-go-live"] },
+          { id: "timing", type: "text", label: "Go-live timing?", placeholder: "e.g., cutover over year-end close" }
+        ],
+        tips: [
+          { when: a => (a.scope || []).includes("Parallel run"),
+            text: "A parallel run doubles the workload for the finance team during the transition — make sure staffing accounts for it." }
+        ] } },
+      { id: "finance_sme", label: "Finance Subject-Matter Depth", icon: "📘", deepDive: {
+        intro: "How much finance knowledge the PM personally needs.",
+        questions: [
+          { id: "depth", type: "radio", label: "Finance depth required?",
+            options: ["Strong — must understand accounting/close", "Moderate — understands finance processes", "Light — pure PM"] },
+          { id: "certs", type: "chips", label: "Certifications?",
+            options: ["PMP", "Prosci", "CPA", "Agile / Scrum", "Six Sigma", "None required"] }
+        ],
+        tips: [
+          { when: a => a.depth === "Strong — must understand accounting/close",
+            text: "A PM who genuinely knows accounting is rare — that's the whole reason to source through Management Resources rather than a generic PMO firm." }
+        ] } }
+    ],
+    specialists: [
+      { label: "PMO / other project managers", overlapsArea: "planning_governance" },
+      { label: "Business analysts", overlapsArea: "testing_cutover" },
+      { label: "Controller / accounting team", overlapsArea: "finance_sme" },
+      { label: "IT project team", overlapsArea: null },
+      { label: "Systems integrator / vendor", overlapsArea: "program_delivery" },
+      { label: "Change / training team", overlapsArea: "change_management" }
+    ],
+    profileRules: [
+      { must: ["program_delivery", "finance_sme"], profile: "Finance program manager",
+        detail: "Target PMs who've led finance system or transformation programs. Finance depth plus delivery track record are the filters." },
+      { must: ["change_management", "stakeholders"], profile: "Change management consultant",
+        detail: "Target Prosci-certified change practitioners. Adoption outcomes and communications experience are the filters." },
+      { must: ["testing_cutover", "planning_governance"], profile: "Implementation / cutover PM",
+        detail: "Target PMs who've run UAT and go-live for finance systems. Cutover planning and hypercare are the filters." }
+    ],
+    stackCategories: [
+      { id: "pm_tools", label: "PM / tracking tools", placeholder: "MS Project, Jira, Smartsheet…",
+        options: ["MS Project", "Jira", "Smartsheet", "Asana", "Monday", "Planview", "Excel"] },
+      { id: "collab", label: "Collaboration / docs", placeholder: "Confluence, SharePoint…",
+        options: ["Confluence", "SharePoint", "Notion", "Teams", "Miro"] },
+      { id: "erp", label: "Systems being implemented", placeholder: "SAP, NetSuite, OneStream…", options: ERP_OPTIONS },
+      { id: "reporting", label: "Reporting / dashboards", placeholder: "Power BI, Excel…", options: REPORTING_OPTIONS }
+    ],
+    aiUseCases: ["Status report drafting", "Meeting summaries", "Risk analysis", "Plan / timeline drafting",
+                 "Training material creation", "Communications drafting", "Documentation"],
+    aiTools: ["ChatGPT / Claude", "Microsoft Copilot (M365)", "Jira / Atlassian Intelligence", "Notion AI", "AI meeting notes (Otter / Fireflies)"],
+    metrics: ["On-time delivery", "On-budget delivery", "Go-live success", "Adoption / utilization rate",
+              "Scope adherence", "Defect / rework rate", "Stakeholder satisfaction", "Milestone completion"],
+    backgrounds: BG_COMMON.concat(["Big 4 consulting", "Systems integrator", "Internal PMO", "Change management consultancy"])
+  },
+
+  /* ------------------------------------------ SUPPLY CHAIN & PROCUREMENT */
+  supply_chain: {
+    label: "Supply Chain & Procurement Consultant",
+    icon: "📦",
+    tagline: "Sourcing, spend analytics, inventory, and cost reduction",
+    about: "These consultants work the cost side of the business — analyzing what a company buys and from whom, renegotiating supplier contracts, and optimizing inventory so cash isn't tied up on shelves. It sits between finance and operations, and the deliverable is usually measurable savings.",
+    blurb: "This is the cost-and-operations edge of the Performance Optimization pillar. Pin whether the mandate is analysis (find the savings) or execution (go negotiate them), and how much operations versus finance experience the client actually needs.",
+    timePrompt: "“Between spend analysis, sourcing/negotiation, inventory work, and process improvement — what three things carry most of the engagement, and roughly what percentage each?”",
+    focusAreas: [
+      { id: "spend_analytics", label: "Spend Analytics", icon: "📉", deepDive: {
+        intro: "Understanding where the money actually goes.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["Spend cube / categorization", "Supplier rationalization", "Tail spend analysis",
+                      "Savings opportunity identification", "Benchmarking", "Contract compliance / leakage"] },
+          { id: "spend_size", type: "select", label: "Addressable spend?",
+            options: ["Under $10M", "$10M–$50M", "$50M–$250M", "$250M–$1B", "$1B+", "Unknown"] },
+          { id: "data_state", type: "radio", label: "State of spend data?",
+            options: ["Clean and categorized", "Messy / needs cleansing", "Scattered across systems", "Not sure"] }
+        ],
+        tips: [
+          { when: a => a.data_state === "Scattered across systems",
+            text: "If spend data is scattered, the first month is data cleansing, not savings — set that expectation so nobody expects quick wins." }
+        ] } },
+      { id: "sourcing", label: "Strategic Sourcing & Negotiation", icon: "🤝", deepDive: {
+        intro: "Execution side — running events and negotiating deals.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["RFP / RFQ events", "Supplier negotiation", "Contract redlining", "Category strategy",
+                      "Supplier consolidation", "Should-cost modeling"] },
+          { id: "categories", type: "chips", label: "Which categories?",
+            options: ["Direct materials", "Indirect / MRO", "IT & telecom", "Professional services", "Logistics / freight",
+                      "Facilities", "Travel", "Marketing"] },
+          { id: "authority", type: "radio", label: "Negotiating authority?",
+            options: ["Leads negotiations", "Supports the client's negotiator", "Analysis only"] }
+        ],
+        tips: [
+          { when: a => (a.categories || []).includes("Direct materials"),
+            text: "Direct materials sourcing requires industry and manufacturing knowledge — a very different profile from indirect/professional services buyers." }
+        ] } },
+      { id: "inventory", label: "Inventory & Working Capital", icon: "🏭", deepDive: {
+        intro: "Where supply chain and finance meet on the balance sheet.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["Inventory optimization", "Excess & obsolete analysis", "Safety stock / reorder points",
+                      "Demand planning", "S&OP process", "Inventory accounting / costing"] },
+          { id: "issue", type: "radio", label: "Primary issue?",
+            options: ["Too much inventory / cash tied up", "Stockouts / service issues", "Inaccurate counts", "Costing problems"] }
+        ],
+        tips: [
+          { when: a => a.issue === "Too much inventory / cash tied up",
+            text: "Inventory reduction is a cash-release story — get the current inventory value and turns so the consultant has a measurable target." }
+        ] } },
+      { id: "procurement_ops", label: "Procurement Operations", icon: "⚙️", deepDive: {
+        intro: "The process and systems side of buying.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["P2P process redesign", "Procurement policy", "Approval workflows", "Supplier onboarding",
+                      "Catalog management", "System implementation"] },
+          { id: "tools", type: "chips", label: "Procurement systems?",
+            options: ["Coupa", "Ariba", "Jaggaer", "GEP", "Ivalua", "ERP-native", "None"] }
+        ], tips: [] } },
+      { id: "supplier_risk", label: "Supplier Risk & Performance", icon: "🛡️", deepDive: {
+        intro: "Managing the supply base beyond price.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["Supplier risk assessment", "Performance scorecards", "Diversity spend", "ESG / sustainability",
+                      "Business continuity", "Single-source mitigation"] }
+        ], tips: [] } },
+      { id: "cost_reduction", label: "Cost Reduction Programs", icon: "✂️", deepDive: {
+        intro: "Broader cost takeout beyond procurement.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["Cost takeout program", "Zero-based budgeting", "Make vs. buy analysis", "Outsourcing evaluation",
+                      "Footprint / logistics optimization"] },
+          { id: "target", type: "text", label: "Savings target?", placeholder: "e.g., $5M annualized within 12 months" },
+          { id: "tracking", type: "radio", label: "How are savings validated?",
+            options: ["Finance-validated / P&L", "Procurement-reported", "Not defined"] }
+        ],
+        tips: [
+          { when: a => a.tracking === "Not defined",
+            text: "Undefined savings validation is where these engagements go sideways — push the client to agree up front how savings hit the P&L." }
+        ] } }
+    ],
+    specialists: [
+      { label: "CPO / procurement leadership", overlapsArea: "sourcing" },
+      { label: "Category managers / buyers", overlapsArea: "sourcing" },
+      { label: "Supply chain / planning team", overlapsArea: "inventory" },
+      { label: "FP&A team", overlapsArea: "cost_reduction" },
+      { label: "Operations leadership", overlapsArea: null },
+      { label: "AP / P2P team", overlapsArea: "procurement_ops" }
+    ],
+    profileRules: [
+      { must: ["spend_analytics", "cost_reduction"], profile: "Spend / cost analytics consultant",
+        detail: "Target analytical consultants who build spend cubes and savings pipelines. Data skills and validated savings are the filters." },
+      { must: ["sourcing", "supplier_risk"], profile: "Strategic sourcing consultant",
+        detail: "Target category sourcing professionals. Negotiated savings and category depth are the filters." },
+      { must: ["inventory", "procurement_ops"], profile: "Supply chain operations consultant",
+        detail: "Target consultants with planning and inventory experience. S&OP and working-capital results are the filters." }
+    ],
+    stackCategories: [
+      { id: "procurement_tools", label: "Procurement / sourcing systems", placeholder: "Coupa, Ariba…",
+        options: ["Coupa", "Ariba", "Jaggaer", "GEP", "Ivalua", "Zycus", "ERP-native"] },
+      { id: "erp", label: "ERP", placeholder: "SAP, Oracle…", options: ERP_OPTIONS },
+      { id: "planning_tools", label: "Supply chain planning", placeholder: "Kinaxis, o9, Blue Yonder…",
+        options: ["Kinaxis", "o9", "Blue Yonder", "SAP IBP", "Excel"] },
+      { id: "analytics", label: "Analytics tools", placeholder: "Power BI, Alteryx, Excel…", options: REPORTING_OPTIONS }
+    ],
+    aiUseCases: ["Spend classification", "Contract analysis", "Should-cost modeling", "Demand forecasting",
+                 "Supplier research", "RFP drafting", "Savings tracking"],
+    aiTools: ["ChatGPT / Claude", "Microsoft Copilot (M365)", "Coupa AI", "Alteryx AI", "Power BI Copilot", "Excel Copilot"],
+    metrics: ["Savings delivered", "Spend under management", "Inventory turns", "Days inventory outstanding",
+              "Supplier consolidation", "Contract compliance", "Cost avoidance", "Working capital released"],
+    backgrounds: BG_COMMON.concat(["Procurement consulting", "Manufacturing operations", "Distribution / logistics", "Big 4 consulting"])
+  },
+
+  /* ------------------------------ TECHNICAL ACCOUNTING & IPO READINESS */
+  technical_accounting: {
+    label: "Technical Accounting & IPO Readiness Consultant",
+    icon: "📐",
+    tagline: "Complex GAAP, restatements, SEC reporting, and going public",
+    about: "Technical accounting consultants handle the hard, unusual accounting questions — revenue recognition on complex contracts, acquisitions, equity structures — and write the memos that support those positions to auditors. IPO readiness is a specialty within it: getting a private company's financials, controls, and reporting to public-company standard.",
+    blurb: "This is the deep end of accounting expertise — almost always Big 4-trained CPAs. Pin the specific standards, whether SEC reporting is involved, and whether the mandate is advisory (write the memo) or execution (rebuild the financials).",
+    timePrompt: "“Between technical research, documentation, reporting, and audit interaction — what three things carry most of the engagement, and roughly what percentage each?”",
+    focusAreas: [
+      { id: "ipo_readiness", label: "IPO Readiness", icon: "🔔", deepDive: {
+        intro: "A named MR capability — getting to public-company standard.",
+        questions: [
+          { id: "stage", type: "radio", label: "Where are they in the process?",
+            options: ["Exploring / early prep", "Actively preparing (12–24 months out)", "In registration (S-1 drafting)", "Recently public"] },
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["S-1 / registration statement", "Carve-out or predecessor financials", "3-year audited financials",
+                      "SOX readiness", "Public-company close calendar", "Segment reporting", "EPS / capitalization",
+                      "MD&A drafting", "Comfort letter support"] },
+          { id: "auditor", type: "text", label: "Auditor and underwriters?", placeholder: "e.g., audited by Deloitte, bankers TBD" }
+        ],
+        tips: [
+          { when: a => a.stage === "In registration (S-1 drafting)",
+            text: "An active S-1 is an all-hands, deadline-driven sprint — target consultants who've been through registration before and can start immediately." },
+          { when: a => (a.scope || []).includes("Carve-out or predecessor financials"),
+            text: "Carve-out financials are highly specialized — target Big 4 transaction services or SEC reporting specialists specifically." }
+        ] } },
+      { id: "revenue", label: "Revenue Recognition (ASC 606)", icon: "💵", deepDive: {
+        intro: "The most commonly requested technical specialty.",
+        questions: [
+          { id: "complexity", type: "chips", label: "Complexity drivers?",
+            options: ["Multiple performance obligations", "Variable consideration", "Principal vs. agent", "Contract modifications",
+                      "Licensing / IP", "Percentage of completion", "SaaS / subscription", "Standalone selling price"] },
+          { id: "scope", type: "radio", label: "Mandate?",
+            options: ["Implement ASC 606", "Review existing policy", "Write memos for specific contracts", "Remediate an error"] },
+          { id: "volume", type: "text", label: "Contract volume / type?", placeholder: "e.g., 200 enterprise SaaS contracts" }
+        ],
+        tips: [
+          { when: a => a.scope === "Remediate an error",
+            text: "Revenue errors often mean a restatement is in play — confirm materiality and whether the auditors have been notified." }
+        ] } },
+      { id: "restatements", label: "Restatements & Error Remediation", icon: "🚨", deepDive: {
+        intro: "High-stakes cleanup work.",
+        questions: [
+          { id: "severity", type: "radio", label: "Severity?",
+            options: ["Material weakness / restatement", "Significant deficiency", "Out-of-period adjustment", "Under investigation"] },
+          { id: "areas", type: "chips", label: "Which areas?",
+            options: ["Revenue", "Inventory", "Accruals / estimates", "Equity", "Leases", "Consolidation", "Cash flows"] },
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["Root cause analysis", "Restate prior periods", "Remediate controls", "Communicate with auditors", "SEC correspondence"] }
+        ],
+        tips: [
+          { when: a => a.severity === "Material weakness / restatement",
+            text: "Restatements are urgent, visible, and audit-committee-level — this needs a senior SEC reporting specialist, and rate resistance should be low." }
+        ] } },
+      { id: "complex_transactions", label: "Complex Transactions", icon: "🧩", deepDive: {
+        intro: "One-off accounting for unusual events.",
+        questions: [
+          { id: "areas", type: "chips", label: "Which transactions?",
+            options: ["Business combinations (ASC 805)", "Purchase price allocation", "Goodwill / impairment (ASC 350/360)",
+                      "Equity & stock comp (ASC 718)", "Debt / derivatives (ASC 815)", "Leases (ASC 842)",
+                      "Discontinued operations", "Variable interest entities"] },
+          { id: "deliverable", type: "radio", label: "Deliverable?",
+            options: ["Technical memo", "Journal entries and support", "Both", "Advisory only"] }
+        ],
+        tips: [
+          { when: a => (a.areas || []).includes("Purchase price allocation"),
+            text: "PPA work usually needs valuation coordination — confirm whether a third-party valuation firm is engaged or the consultant must manage it." }
+        ] } },
+      { id: "sec_reporting", label: "SEC Reporting", icon: "📄", deepDive: {
+        intro: "The periodic filing machine.",
+        questions: [
+          { id: "filings", type: "chips", label: "Which filings?",
+            options: ["10-K", "10-Q", "8-K", "S-1 / S-4", "Proxy", "XBRL tagging"] },
+          { id: "role", type: "radio", label: "Their role?",
+            options: ["Owns the filing process", "Prepares sections", "Reviews", "Backfills during a gap"] },
+          { id: "tools", type: "chips", label: "Reporting tools?",
+            options: ["Workiva (WDesk)", "Active Disclosure", "Excel / Word", "Other"] }
+        ],
+        tips: [
+          { when: a => (a.tools || []).includes("Workiva (WDesk)"),
+            text: "Workiva experience is a common hard requirement for SEC reporting roles — treat it as a filter." }
+        ] } },
+      { id: "policy_documentation", label: "Policy & Documentation", icon: "📚", deepDive: {
+        intro: "Building the accounting rulebook.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["Accounting policy manual", "Technical memos", "Position papers", "Whitepapers for auditors", "Training the team"] },
+          { id: "state", type: "radio", label: "Current documentation?",
+            options: ["Mature", "Partial / outdated", "None"] }
+        ], tips: [] } },
+      { id: "audit_interaction", label: "Auditor Interaction", icon: "🔍", deepDive: {
+        intro: "Defending positions to the audit firm.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's expected?",
+            options: ["Present positions to auditors", "Respond to audit inquiries", "Negotiate adjustments",
+                      "Coordinate PBC delivery", "National office consultations"] },
+          { id: "firm", type: "text", label: "Which audit firm?", placeholder: "e.g., EY, regional firm" }
+        ], tips: [] } },
+      { id: "ifrs", label: "IFRS & Multi-GAAP", icon: "🌍", deepDive: {
+        intro: "A named MR capability — reporting under more than one framework.",
+        questions: [
+          { id: "scope", type: "chips", label: "What's in scope?",
+            options: ["IFRS conversion", "Dual reporting (US GAAP + IFRS)", "Local statutory GAAP", "Group reporting packages"] },
+          { id: "countries", type: "text", label: "Which jurisdictions?", placeholder: "e.g., UK, Germany, Brazil" }
+        ],
+        tips: [
+          { when: (a, s) => areaPriority(s, "ifrs") === "must",
+            text: "IFRS depth is scarce in the US market — expect a smaller pool, and consider candidates with international or foreign-parent experience." }
+        ] } }
+    ],
+    specialists: [
+      { label: "Controller / Assistant Controller", overlapsArea: "sec_reporting" },
+      { label: "SEC Reporting Manager", overlapsArea: "sec_reporting" },
+      { label: "Technical Accounting Manager", overlapsArea: "complex_transactions" },
+      { label: "External auditors", overlapsArea: "audit_interaction" },
+      { label: "Internal Audit / SOX", overlapsArea: "restatements" },
+      { label: "Legal / securities counsel", overlapsArea: "ipo_readiness" },
+      { label: "Valuation firm", overlapsArea: "complex_transactions" }
+    ],
+    profileRules: [
+      { must: ["ipo_readiness", "sec_reporting"], profile: "IPO readiness / SEC reporting specialist",
+        detail: "Target Big 4 SEC reporting alumni who've been through registration. S-1 and public-company close experience are the filters." },
+      { must: ["restatements", "complex_transactions"], profile: "Technical accounting remediation specialist",
+        detail: "Target senior technical CPAs with restatement experience. Root cause analysis and auditor negotiation are the filters." },
+      { must: ["revenue", "policy_documentation"], profile: "Revenue recognition specialist",
+        detail: "Target ASC 606 implementation veterans. Memo writing and contract analysis at volume are the filters." },
+      { must: ["ifrs", "sec_reporting"], profile: "Multi-GAAP / international reporting specialist",
+        detail: "Target candidates with IFRS and foreign-parent reporting experience. Dual-reporting depth is the filter." }
+    ],
+    stackCategories: [
+      { id: "reporting_tools", label: "SEC reporting tools", placeholder: "Workiva, Active Disclosure…",
+        options: ["Workiva (WDesk)", "Active Disclosure", "Certent", "Excel / Word"] },
+      { id: "research", label: "Technical research", placeholder: "Checkpoint, PwC Viewpoint…",
+        options: ["Checkpoint", "PwC Viewpoint", "Deloitte DART", "EY Atlas", "KPMG Accounting Research Online", "Codification (FASB)"] },
+      { id: "erp", label: "ERP / consolidation", placeholder: "SAP, NetSuite, HFM…", options: ERP_OPTIONS },
+      { id: "close_tools", label: "Close / controls tools", placeholder: "BlackLine, AuditBoard…",
+        options: ["BlackLine", "FloQast", "AuditBoard", "Workiva"] }
+    ],
+    aiUseCases: ["Technical research", "Memo drafting", "Contract review at volume", "Policy drafting",
+                 "Disclosure checklist review", "Filing preparation", "Precedent search"],
+    aiTools: ["ChatGPT / Claude", "Microsoft Copilot (M365)", "Checkpoint Edge AI", "Workiva AI", "PwC Viewpoint AI", "Excel Copilot"],
+    metrics: ["On-time filings", "Audit adjustments", "Material weaknesses remediated", "Memo turnaround",
+              "Restatement completion", "IPO milestone readiness", "Auditor acceptance of positions"],
+    backgrounds: ["Big 4 audit", "Big 4 technical accounting / national office", "SEC reporting function",
+                  "Public company", "Pre-IPO / recently public", "Transaction services"]
   }
 };
 
 /* Order roles appear in the picker */
 const ROLE_ORDER = [
+  /* Accounting, Finance, Tax, Treasury & Audit — business as usual */
   "interim_cfo",
   "controller",
   "accounting_manager",
-  "fpa_analyst",
-  "internal_auditor",
+  "technical_accounting",
   "tax_manager",
+  "treasury",
+  "internal_auditor",
   "compliance_risk",
+  /* Performance Optimization & Business Analytics */
+  "fpa_analyst",
+  "supply_chain",
+  /* Finance Transformation */
+  "finance_transformation",
+  /* Data, Systems & ERP */
   "financial_systems",
-  "treasury"
+  "epm_data",
+  "project_change"
 ];
 
   const APP_BRAND = { title: "Management Resources", subtitle: "Job Order Intake" };

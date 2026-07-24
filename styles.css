@@ -10,6 +10,8 @@
   --accent-strong: #1c46b5;
   --accent-contrast: #ffffff;
   --accent-soft: #e8eefc;
+  --accent-ring: rgba(36, 86, 214, .15);
+  --accent-ring-soft: rgba(36, 86, 214, .12);
   --good: #178a4c;
   --warn-bg: #fff7e6;
   --warn-line: #f0c36d;
@@ -32,6 +34,8 @@
     --accent-strong: #85a7f5;
     --accent-contrast: #0c1220;
     --accent-soft: #1e2c4f;
+    --accent-ring: rgba(107, 147, 242, .25);
+    --accent-ring-soft: rgba(107, 147, 242, .18);
     --good: #3fbf7a;
     --warn-bg: #382d13;
     --warn-line: #8a6d2b;
@@ -53,6 +57,8 @@
   --accent-strong: #85a7f5;
   --accent-contrast: #0c1220;
   --accent-soft: #1e2c4f;
+  --accent-ring: rgba(107, 147, 242, .25);
+  --accent-ring-soft: rgba(107, 147, 242, .18);
   --good: #3fbf7a;
   --warn-bg: #382d13;
   --warn-line: #8a6d2b;
@@ -73,6 +79,8 @@
   --accent-strong: #1c46b5;
   --accent-contrast: #ffffff;
   --accent-soft: #e8eefc;
+  --accent-ring: rgba(36, 86, 214, .15);
+  --accent-ring-soft: rgba(36, 86, 214, .12);
   --good: #178a4c;
   --warn-bg: #fff7e6;
   --warn-line: #f0c36d;
@@ -82,6 +90,70 @@
   --disabled-bg: #f1f3f8;
   --disabled-ink: #aab2c2;
 }
+
+/* ---------- per-business accent theme ----------
+   Management Resources (PTS) runs burgundy; Tech and Digital (TTS) keep the
+   blue. The active form is stamped on <html> as data-form, and only the
+   accent family is overridden so every component picks it up. Light and dark
+   variants mirror the base palette's structure. */
+
+:root[data-form="management"] {
+  --accent: #8c1d3f;
+  --accent-strong: #6f1732;
+  --accent-contrast: #ffffff;
+  --accent-soft: #fbe9ee;
+  --accent-ring: rgba(140, 29, 63, .15);
+  --accent-ring-soft: rgba(140, 29, 63, .12);
+  --tip-bg: #fdf0f3;
+  --tip-line: #edc0cd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-form="management"] {
+    --accent: #e08099;
+    --accent-strong: #eca0b4;
+    --accent-contrast: #1a0d12;
+    --accent-soft: #3d1b28;
+    --accent-ring: rgba(224, 128, 153, .25);
+    --accent-ring-soft: rgba(224, 128, 153, .18);
+    --tip-bg: #2e141d;
+    --tip-line: #6b2f43;
+  }
+}
+
+:root[data-theme="dark"][data-form="management"] {
+  --accent: #e08099;
+  --accent-strong: #eca0b4;
+  --accent-contrast: #1a0d12;
+  --accent-soft: #3d1b28;
+  --accent-ring: rgba(224, 128, 153, .25);
+  --accent-ring-soft: rgba(224, 128, 153, .18);
+  --tip-bg: #2e141d;
+  --tip-line: #6b2f43;
+}
+
+:root[data-theme="light"][data-form="management"] {
+  --accent: #8c1d3f;
+  --accent-strong: #6f1732;
+  --accent-contrast: #ffffff;
+  --accent-soft: #fbe9ee;
+  --accent-ring: rgba(140, 29, 63, .15);
+  --accent-ring-soft: rgba(140, 29, 63, .12);
+  --tip-bg: #fdf0f3;
+  --tip-line: #edc0cd;
+}
+/* Management Resources also warms the sidebar (base sidebar is fixed navy) */
+:root[data-form="management"] .sidebar { background: #2b1220; }
+:root[data-form="management"] .nav-step:hover { background: #431e30; }
+:root[data-form="management"] .nav-step .nav-num { background: #57263c; }
+:root[data-form="management"] .theme-btn,
+:root[data-form="management"] .nav-reset { border-color: #5e2c44; }
+:root[data-form="management"] .theme-btn.active { background: #57263c; border-color: #c98da2; }
+:root[data-form="management"] .theme-btn:hover,
+:root[data-form="management"] .nav-reset:hover { border-color: #c98da2; }
+:root[data-form="management"] .brand span { color: #cf9db0; }
+
+
 
 * { box-sizing: border-box; }
 
@@ -304,7 +376,7 @@ h3.subhead { margin: 34px 0 6px; font-size: 19px; padding-top: 18px; border-top:
 .role-card.selected {
   border-color: var(--accent);
   background: var(--accent-soft);
-  box-shadow: 0 0 0 3px rgba(36, 86, 214, .12);
+  box-shadow: 0 0 0 3px var(--accent-ring-soft);
 }
 .role-icon { font-size: 26px; line-height: 1; }
 .role-label { font-weight: 700; font-size: 15px; }
@@ -379,7 +451,7 @@ h3.subhead { margin: 34px 0 6px; font-size: 19px; padding-top: 18px; border-top:
 .notes-panel textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(36, 86, 214, .15);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 /* ---------- questions ---------- */
@@ -403,7 +475,7 @@ input[type="text"], input[type="number"], textarea, select {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(36, 86, 214, .15);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 textarea { resize: vertical; }
 
@@ -459,7 +531,7 @@ textarea { resize: vertical; }
   font: inherit; font-size: 13.5px; color: var(--ink);
   background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px;
 }
-.sched-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(36, 86, 214, .15); }
+.sched-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); }
 .sched-dash { padding-bottom: 8px; font-weight: 700; color: var(--muted); }
 .daywin-block { margin-top: 12px; }
 /* match the 18px indent of the plain ICM #2–4 rows so all ICMs line up */
